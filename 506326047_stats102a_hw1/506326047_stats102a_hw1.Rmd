@@ -4,3 +4,7 @@ author: "Abhijeet Rao"
 date: "2024-01-11"
 output: html_document
 ---
+
+```{r, include=FALSE}
+source("506326047_stats102a_hw1.R", local = knitr::knit_global())
+```
