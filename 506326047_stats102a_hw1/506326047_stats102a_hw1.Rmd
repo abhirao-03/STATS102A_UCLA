@@ -1,0 +1,6 @@
+---
+title: "HW1 STATS102A"
+author: "Abhijeet Rao"
+date: "2024-01-11"
+output: html_document
+---
