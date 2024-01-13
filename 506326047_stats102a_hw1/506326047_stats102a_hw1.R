@@ -1,10 +1,10 @@
-gcd <- function(x, y, ...){
+GCD <- function(x, y, ...){
   # Outputs the GCD of two integers.
   #Args:
-  #x: integer   1-dimensional vector
-  #y: integer   1-dimensional vector
+  #x: integer    1-dimensional vector
+  #y: integer    1-dimensional vector
   #Return:
-  #gcd: integer 1-dimensional vector
+  #gcd: integer  1-dimensional vector
   if (x %% y == 0){
     return (min(c(x, y)))
   }
@@ -17,4 +17,14 @@ gcd <- function(x, y, ...){
     }
     return (x)
   }
+}
+
+LCM <- function(x){
+  while (length(x) != 1){
+    a <- abs(x[1])
+    b <- abs(x[2])
+    x <- x[2:length(x)]
+    x[1] <- a * b / GCD(a,b)
+  }
+  return (x)
 }
