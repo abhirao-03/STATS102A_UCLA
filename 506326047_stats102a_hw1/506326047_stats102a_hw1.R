@@ -24,7 +24,7 @@ gcd <- function(x, y, ...){
   }
 }
 
-lcm <- function(x){
+lcm <- function(x, ...){
   #Outputs the LCM of the integers.
   #Args:
   #x: vector    n x 1 dimensional vector where 1 < n < 101
@@ -40,4 +40,13 @@ lcm <- function(x){
     x[1] <- a * b / gcd(a,b)
   }
   return (x)
+}
+
+is_prime <- function(x, ...){
+  final_list <- as.logical(1:length(x))
+  for (i in 1:length(x)){
+    n <- x[i]
+    final_list[i] = all((1:(n-1))^(n-1) %% n == 1)
+  }
+  return (final_list)
 }
