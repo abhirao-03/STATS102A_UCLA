@@ -8,3 +8,14 @@ output: html_document
 ```{r, include=FALSE}
 source("506326047_stats102a_hw1.R", local = knitr::knit_global())
 ```
+
+# Test Cases for Greatest Common Divisor (GCD) and Least Common Multiple (LCM)
+## GCD Test Case
+```{r GCD_test_cases}
+c(gcd(72, 8) == 8, gcd(-1, 531) == 1, gcd(47011, 73618) == 1)
+```
+## LCM Test Case
+```{r LCM_test_cases}
+c(lcm(c(-12, 21)) == 84, lcm(c(4789, 6123, 199)) == 5835286353)
+```
+

@@ -1,30 +1,43 @@
-GCD <- function(x, y, ...){
+gcd <- function(x, y, ...){
   # Outputs the GCD of two integers.
   #Args:
-  #x: integer    1-dimensional vector
-  #y: integer    1-dimensional vector
+  #x: integer
+  #y: integer
   #Return:
-  #gcd: integer  1-dimensional vector
-  if (x %% y == 0){
-    return (min(c(x, y)))
+  #GCD: integer
+  
+  nums = c(abs(x), abs(y)) #stores pos x, y in case of later transformation.
+  a = max(nums)            #makes a the higher value and b the lower value
+  b = min(nums)
+  
+  if (a %% b == 0){        #if a mod b = 0 then the min of {a,b} is the GCD.
+    return (b)
   }
-  else{
-    mod_xy <- x %% y
+  else{                    #follow the algorithm described in HW1.pdf
+    mod_xy <- a %% b
     while (mod_xy != 0){
-      mod_xy <-  x %% y
-      x <- y
-      y <- mod_xy
+      mod_xy <-  a %% b
+      a <- b
+      b <- mod_xy
     }
-    return (x)
+    return (a)
   }
 }
 
-LCM <- function(x){
+lcm <- function(x){
+  #Outputs the LCM of the integers.
+  #Args:
+  #x: vector    n x 1 dimensional vector where 1 < n < 101
+  #Return:
+  #LCM: integer  1-dimensional vector
+
+  #We can use the relationship that LCM(a, b) = (a * b)/GCD(a, b)
+  #run the code block below till we have a vector with 1 integer value.
   while (length(x) != 1){
     a <- abs(x[1])
     b <- abs(x[2])
     x <- x[2:length(x)]
-    x[1] <- a * b / GCD(a,b)
+    x[1] <- a * b / gcd(a,b)
   }
   return (x)
 }
