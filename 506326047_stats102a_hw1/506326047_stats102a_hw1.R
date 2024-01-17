@@ -43,11 +43,13 @@ lcm <- function(x, ...){
 }
 
 is_prime <- function(x, ...){
-  # from https://www.geeksforgeeks.org/prime-numbers/
-  final_list <- as.logical(1:length(x))
+  logical_list <- as.logical(1:length(x))
   for (i in 1:length(x)){
-    n <- x[i]
-    final_list[i] = all((1:(n-1))^(n-1) %% n == 1)
+    for (val in (x[i] %% (2:(x[i] - 1)))){
+      if (val == 0){
+        logical_list[i] <- FALSE
+      }
+    }
   }
-  return (final_list)
+  return (logical_list)
 }
