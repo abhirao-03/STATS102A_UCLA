@@ -85,3 +85,15 @@ prime_divisors <- function(x){
   }
   prime_list
 }
+
+
+get_factors <- function(x){
+  primes <- prime_divisors(x)
+  exponents <- 1:length(primes)
+  for (i in 1:length(primes)){
+    p = primes[i]
+    exponents[i] <- exp_count(x, p)
+  }
+  factors = list("primes" = primes, "exponents" = exponents)
+  factors
+}
