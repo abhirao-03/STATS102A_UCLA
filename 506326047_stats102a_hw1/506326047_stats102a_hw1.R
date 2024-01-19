@@ -1,4 +1,4 @@
-gcd <- function(x, y, ...){
+gcd <- function(x, y){
   # Outputs the GCD of two integers.
   #Args:
   #x: integer
@@ -24,7 +24,7 @@ gcd <- function(x, y, ...){
   }
 }
 
-lcm <- function(x, ...){
+lcm <- function(x){
   #Outputs the LCM of the integers.
   #Args:
   #x: vector    n x 1 dimensional vector where 1 < n < 101
@@ -39,17 +39,35 @@ lcm <- function(x, ...){
     x <- x[2:length(x)]
     x[1] <- a * b / gcd(a,b)
   }
-  return (x)
+  x
 }
 
-is_prime <- function(x, ...){
+is_prime <- function(x){
   logical_list <- as.logical(1:length(x))
   for (i in 1:length(x)){
-    for (val in (x[i] %% (2:(x[i] - 1)))){
-      if (val == 0){
-        logical_list[i] <- FALSE
+    if (x[i] == 1 | x[i] == 2){
+      logical_list[i] <- TRUE
+    } else{
+        for (val in (x[i] %% (2:(x[i] - 1)))){
+          if (val == 0){
+            logical_list[i] <- FALSE
+        }
       }
     }
   }
-  return (logical_list)
+  logical_list
+}
+
+## TOY QUESTION 1
+## write a function that takes an integer as input >= 2
+## and counts how many times 2 divides that integer
+
+exp_count <- function(x, prime){
+  exp_count <- 0
+  for (i in 1:x){
+    if (x %% prime^(i) == 0){
+      exp_count <- exp_count + 1
+    }
+  }
+  exp_count
 }
