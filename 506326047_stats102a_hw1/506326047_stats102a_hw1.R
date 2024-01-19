@@ -71,3 +71,17 @@ exp_count <- function(x, prime){
   }
   exp_count
 }
+
+## TOY QUESTION 2
+## take an integer x as input with x >= 2. return a list of prime numbers that divide x.
+prime_divisors <- function(x){
+  prime_list <- c()
+  for (i in 2:x){
+    if (is_prime(i)){
+      if (x %% i == 0){
+        prime_list <- append(prime_list, i)
+      }
+    }
+  }
+  prime_list
+}
