@@ -6,7 +6,7 @@ gcd <- function(x, y){
   #Return:
   #GCD: integer
   
-  nums = c(abs(x), abs(y)) #stores pos x, y in case of later transformation.
+  nums = c(abs(x), abs(y)) #stores x, y in case of later transformation.
   a = max(nums)            #makes a the higher value and b the lower value
   b = min(nums)
   
@@ -58,9 +58,6 @@ is_prime <- function(x){
   logical_list
 }
 
-## TOY QUESTION 1
-## write a function that takes an integer as input >= 2
-## and counts how many times 2 divides that integer
 
 exp_count <- function(x, prime){
   exp_count <- 0
@@ -72,8 +69,6 @@ exp_count <- function(x, prime){
   exp_count
 }
 
-## TOY QUESTION 2
-## take an integer x as input with x >= 2. return a list of prime numbers that divide x.
 prime_divisors <- function(x){
   prime_list <- c()
   for (i in 2:x){
