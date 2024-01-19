@@ -32,6 +32,7 @@ lcm <- function(x) {
 
   # We can use the relationship that LCM(a, b) = (a * b)/GCD(a, b)
   # run the code block below till we have a vector with 1 integer value.
+
   while (length(x) != 1) {
     a <- abs(x[1])
     b <- abs(x[2])
@@ -41,12 +42,19 @@ lcm <- function(x) {
   x
 }
 
+
 is_prime <- function(x) {
+  # The helper function to return a list of bools for primes.
+  # Args:
+  # x: vector    n x 1 dimensional vector where 1 <= n
+  # Return:
+  # logical_list: list of bools for each i in x.
+
   logical_list <- as.logical(1:length(x))
   for (i in 1:length(x)) {
-    if (x[i] == 1 | x[i] == 2) {
+    if (x[i] == 1 | x[i] == 2) { # handle 1 and 2 differently than other primes.
       logical_list[i] <- TRUE
-    } else {
+    } else { # see if any value between 1 and x divides x: if so then not prime.
       for (val in (x[i] %% (2:(x[i] - 1)))) {
         if (val == 0) {
           logical_list[i] <- FALSE
@@ -59,6 +67,13 @@ is_prime <- function(x) {
 
 
 exp_count <- function(x, prime) {
+  # Returns the exponent required for a given prime number to divide some x.
+  # Args:
+  # x: integer      the number to which the prime will be raised.
+  # prime: integer  the prime number to raise to x.
+  # Return:
+  # logical_list: list of bools for each i in x.
+
   exp_count <- 0
   for (i in 1:x) {
     if (x %% prime^(i) == 0) {
@@ -68,7 +83,14 @@ exp_count <- function(x, prime) {
   exp_count
 }
 
+
 prime_divisors <- function(x) {
+  # Finds the prime divisors of a given integer.
+  # Args:
+  # x: integer
+  # Return
+  # prime_list: list   the primes that divide x.
+
   prime_list <- c()
   for (i in 2:x) {
     if (is_prime(i)) {
@@ -82,6 +104,12 @@ prime_divisors <- function(x) {
 
 
 get_factors <- function(x) {
+  # Combines the previous two functions to get the prime factors and powers.
+  # Args:
+  # x:integer
+  # Return:
+  # factors:list  consisting of 2 nested lists called "primes" and "exponents".
+
   primes <- prime_divisors(x)
   exponents <- 1:length(primes)
   for (i in 1:length(primes)) {
