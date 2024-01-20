@@ -96,11 +96,12 @@ Now all we need to do is combine the two functions together.
 6. Return the complete list `factors` that contains both `primes` and `exponents.`
 
 #### Test Cases
-```{r prime factorization test cases}
+```{r prime factorization test cases, error=TRUE}
 x <- sample(x = 1e4, size = 1)
 y <- get_factors(x)
 this_works <- prod(y$primes^y$exponents) == x & all(is_prime(y$primes))
 
 this_works
 get_factors(1920)
+get_factors(1.92)
 ```
