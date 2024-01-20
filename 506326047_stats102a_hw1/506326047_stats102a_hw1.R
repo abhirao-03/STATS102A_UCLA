@@ -32,7 +32,7 @@ lcm <- function(x) {
 
   # We can use the relationship that LCM(a, b) = (a * b)/GCD(a, b)
   # run the code block below till we have a vector with 1 integer value.
-
+  
   while (length(x) != 1) {
     a <- abs(x[1])
     b <- abs(x[2])
@@ -73,16 +73,14 @@ exp_count <- function(x, prime) {
   # prime: integer  the prime number to raise to x.
   # Return:
   # logical_list: list of bools for each i in x.
-
+  
   exp_count <- 0
-  for (i in 1:x) {
-    if (x %% prime^(i) == 0) {
-      exp_count <- exp_count + 1
-    }
+  while (x %% prime == 0){
+    exp_count <- exp_count + 1
+    x <- x / prime
   }
   exp_count
 }
-
 
 prime_divisors <- function(x) {
   # Finds the prime divisors of a given integer.

@@ -11,49 +11,96 @@ source("506326047_stats102a_hw1.R", local = knitr::knit_global())
 
 ## Question 1
 
-### a)
-
-More \# signs make smaller headers.
-
-Include an algorithm or flowchart:
-
-### Algorithm Name:
-
-1.  Steps
-2.  Go
-3.  Here
-
-### Flowchart
-
-The following line shows you how to embed images in-line. This assumes that your homework folder also contains an Images directory where you will store all of the images. Delete this line if you don't have an image to test, so your file will knit.
-
-### Test Cases
-
-## Question 1
-
-### GCD Algorithm
+### A) GCD Algorithm
 
 1.  Store `x` and `y` into a vector.
 2.  Let `a` and `b` be the max and min of that vector respectively.
 3.  If `b` divides `a` then return `b`.
 4.  Otherwise do the following:
-    1.  $$
+    a.  $$
         \begin{align*}
         x_1~\textrm{mod}~x_2 &= x_3\\
         x_2~\textrm{mod}~x_3 &= x_4\\
         x_3~\textrm{mod}~x_4 &= \cdots\\
         \vdots~~~~~\\
-        x_n\textrm{mod}~x_{n+1} &= 0
+        x_n~\textrm{mod}~x_{n+1} &= 0
         \end{align*}
         $$
 5.  Then return $x_{n+1}$ .
 
-### Test Cases
+#### Test Cases
 
-```{r GCD_test_cases}
+```{r gcd() test cases}
 c(gcd(72, 8) == 8, gcd(-1, 531) == 1, gcd(47011, 73618) == 1)
 ```
 
-```{r LCM_test_cases}
+### B) LCM Algorithm
+
+Since we have coded in the minimum and maximum consideration into the `gcd()` function above, we do not have to worry about sorting again. The `lcm()` function hinges on these two relationships: $$
+\begin{align}
+  \textrm{lcm}(a, b, c) &= \textrm{lcm}(\textrm{lcm}(a,b), c)\\\\
+  \textrm{lcm}(a, b) &= \frac{a\cdot b}{\textrm{gcd}(a, b)}
+\end{align}
+$$ This is how the algorithm works: 1. Create a while loop until the vector `x` is of length 1. 2. Store `a` and `b` as the first and second elements of `x` respectively. 3. Cut the length of `x` by 1 4. Compute and store $\textrm{lcm}(a, b) = \frac{a\cdot b}{\textrm{gcd}(a, b)}$ as the first element of `x`. 5. Repeat steps 2-4 until `x` is of size 1. 6. Return `x`.
+
+#### Test Cases
+
+```{r lcm() test cases}
 c(lcm(c(-12, 21)) == 84, lcm(c(4789, 6123, 199)) == 5835286353)
+```
+
+## Question 2
+
+### A) Helper Function `is_prime()` Algorithm.
+
+1.  Create a logical vector the size of `x`.
+2.  Special case for 1 and 2 and set them to `TRUE`
+3.  Create a vector for each element $x_i$ of `x` call it $\vec{x_i} = [2, 3, ..., x_i - 1]$
+4.  mod each element of $\vec{x_i}$ to get $x_i$ $\vec{x}_{i~\textrm{mod}} = [x_i~ \textrm{mod}~2, x_i~\textrm{mod}~3, ..., x_i~\textrm{mod}~(x_i - 1)]$
+5.  If any value of $\vec{x}_{i~\textrm{mod}}$ is 0 then $x_i$ is not prime since it is divisible by something other than 1 and $x_{i}$.
+
+#### Test Cases
+
+```{r is_prime test cases}
+c(is_prime(c(9, 7)), is_prime(c(31, 24)))
+```
+
+### B) Prime Factorization.
+
+To create this function I split it up into two separate chunks of functions. I followed the guidance given in discussions to create
+
+1. `exp_count()`
+2. `prime_divisors()`
+
+#### I) `exp_count()` Algorithm
+
+1.  Take in `x` and `prime`.
+2.  Start a counter called `exp_count` at 0.
+3.  Start dividing `x` by `prime` and divide until there is a remainder. Advance the counter every division `prime`.
+4.  Return how many times we divided by `prime`.
+
+#### II) `prime_divisors()` Algorithm
+
+1.  Take in `x` an integer.
+2.  For all the numbers 1 through x test if it is prime.
+3.  Divide `x` with the primes to see which primes divide `x`.
+
+#### III) Final `get_factors()` Algorithm
+Now all we need to do is combine the two functions together.
+
+1. Take in `x`.
+2. Get the prime divisors of `x` using the `prime_divisors()` function.
+3. Store the prime divisors as a list in `primes`.
+4. Get the exponents of each prime divisor using the `exp_count()` function.
+5. Store the exponents of each divisor in a list `exponents`
+6. Return the complete list `factors` that contains both `primes` and `exponents.`
+
+#### Test Cases
+```{r prime factorization test cases}
+x <- sample(x = 1e4, size = 1)
+y <- get_factors(x)
+this_works <- prod(y$primes^y$exponents) == x & all(is_prime(y$primes))
+
+this_works
+get_factors(1920)
 ```
