@@ -11,25 +11,45 @@ source("506326047_stats102a_hw1.R", local = knitr::knit_global())
 
 ## Question 1
 
-### a) 
+### a)
 
-More # signs make smaller headers.
+More \# signs make smaller headers.
 
 Include an algorithm or flowchart:
 
 ### Algorithm Name:
-1. Steps
-2. Go
-3. Here
+
+1.  Steps
+2.  Go
+3.  Here
 
 ### Flowchart
 
-The following line shows you how to embed images in-line. This assumes that your
-homework folder also contains an Images directory where you will store all of 
-the images. Delete this line if you don't have an image to test, so your file 
-will knit.
+The following line shows you how to embed images in-line. This assumes that your homework folder also contains an Images directory where you will store all of the images. Delete this line if you don't have an image to test, so your file will knit.
 
 ### Test Cases
+
+## Question 1
+
+### GCD Algorithm
+
+1.  Store `x` and `y` into a vector.
+2.  Let `a` and `b` be the max and min of that vector respectively.
+3.  If `b` divides `a` then return `b`.
+4.  Otherwise do the following:
+    1.  $$
+        \begin{align*}
+        x_1~\textrm{mod}~x_2 &= x_3\\
+        x_2~\textrm{mod}~x_3 &= x_4\\
+        x_3~\textrm{mod}~x_4 &= \cdots\\
+        \vdots~~~~~\\
+        x_n\textrm{mod}~x_{n+1} &= 0
+        \end{align*}
+        $$
+5.  Then return $x_{n+1}$ .
+
+### Test Cases
+
 ```{r GCD_test_cases}
 c(gcd(72, 8) == 8, gcd(-1, 531) == 1, gcd(47011, 73618) == 1)
 ```
