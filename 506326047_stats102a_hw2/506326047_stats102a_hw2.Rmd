@@ -1,0 +1,25 @@
+---
+title: "506326047_stats102a_HW2"
+author: "Abhijeet Rao"
+date: "2024-01-30"
+output: html_document
+---
+
+```{r, include=FALSE}
+source("506326047_stats102a_hw2.R", local = knitr::knit_global())
+```
+
+```{r generating missing values homework_4}
+## create the list of random rows we will replace with NA
+for (i in sample(100, 12)){
+  gradebook$Homework_4[i] = NA
+}
+sum(is.na(gradebook$Homework_4))
+```
+
+```{r generating missing values quiz_4}
+for (i in sample(100, 12)){
+  gradebook$Quiz_4[i] = NA
+}
+sum(is.na(gradebook$Quiz_4))
+```
