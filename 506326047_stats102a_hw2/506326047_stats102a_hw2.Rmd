@@ -5,12 +5,14 @@ date: "2024-01-30"
 output: html_document
 ---
 
-
+# Question 1.
 ```{r libraries, include=FALSE}
 library(tidyverse)
 source("506326047_stats102a_hw2.R", local = knitr::knit_global())
 ```
 
+## Creating the Simulated Data.
+Below is the code block that shows how I created the simulated data. First I used the `runif()` function to produce 1200 random values. 1200 because we have 100 rows of 5 quizzes and 7 quizzes so $100\cdot(5 + 7) = 1200$. Then we reshape that into a matrix with 12 columns. Finally we combine the matrices with sequentially generated `UIDs`.
 ```{r simulated data}
 set.seed(506326047) ## set the seed to UID
 
@@ -28,6 +30,8 @@ colnames(gradebook_matrix) <- names
 gradebook <- data.frame(UID=123456789+(1:100), gradebook_matrix)
 ```
 
+## Creating Missing Values.
+To generate the missing values we use the `sample()` function to give us 12 indices of rows between 0 and 100 and then change those values to `NA`.
 ```{r generating missing values homework_4}
 ## create the list of random rows we will replace with NA
 for (i in sample(100, 12)){
@@ -43,13 +47,9 @@ for (i in sample(100, 12)){
 sum(is.na(gradebook$Quiz_4))
 ```
 
-```{r function_trial}
-trial_tibble <- as_tibble(gradebook)
-impute_tibble <- messy_impute(trial_tibble,"mean", margin = 1, trim = 0.25)
-impute_median <- messy_impute(trial_tibble,"median", margin = 1)
-```
-
-
+## The `messy_impute()` function.
+### Algorithm
+1. Firstly we have some error handling steps
 
 input tibble
 which(is.na(tibble), arr.ind = TRUE)
@@ -68,10 +68,6 @@ grocery_tbl %>% pivot_longer(cols = !fruit(all columns except for fruit),
 The tidy object that you get out should have three columns
 UID, Assignments, Marks.
 
-          
-str_detect("abc", "a")
-
-if the pattern is found in that string it is TRUE else FALSE
 
 
 
