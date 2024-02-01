@@ -21,7 +21,7 @@ messy_impute <- function(input_tibble, center = "mean", margin, ...) {
   if (center == "mean") {
     if (margin == 1) {
       for (i in 1:length(na_matrix[, 1])) {
-        if (na_matrix[i, 2] %in% c(1, 2, 3, 4, 5, 6)) {
+        if (na_matrix[i, 2] %in% c(2, 3, 4, 5, 6)) {
           placeholder_row <- input_tibble[na_matrix[i, 1], ]
           placeholder_row <- unlist(placeholder_row, use.names = FALSE)
 

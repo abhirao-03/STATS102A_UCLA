@@ -21,37 +21,90 @@ names <- paste0("Homework_", 1:5)
 names <- append(names, paste0("Quiz_", 1:7))
 
 ## Create the gradebook_matrix with 1200 observations and reshape it to a matrix.
-gradebook_matrix <- matrix(runif(n=1200, min = 0, max = 100), ncol=length(names), byrow=TRUE)
+gradebook_matrix <- matrix(runif(n = 1200, min = 0, max = 100), ncol = length(names), byrow = TRUE)
 
 ## Rename the columns
 colnames(gradebook_matrix) <- names
 
 ## Create the gradebook dataframe with the UID column and the gradebook_matrix.
-gradebook <- data.frame(UID=123456789+(1:100), gradebook_matrix)
+gradebook <- data.frame(UID = 123456789 + (1:100), gradebook_matrix)
 ```
 
 ## Creating Missing Values.
 To generate the missing values we use the `sample()` function to give us 12 indices of rows between 0 and 100 and then change those values to `NA`.
 ```{r generating missing values homework_4}
 ## create the list of random rows we will replace with NA
-for (i in sample(100, 12)){
-  gradebook$Homework_4[i] = NA
+for (i in sample(100, 12)) {
+  gradebook$Homework_4[i] <- NA
 }
 sum(is.na(gradebook$Homework_4))
 ```
 
 ```{r generating missing values quiz_4}
-for (i in sample(100, 12)){
-  gradebook$Quiz_4[i] = NA
+for (i in sample(100, 12)) {
+  gradebook$Quiz_4[i] <- NA
 }
 sum(is.na(gradebook$Quiz_4))
 ```
 
+```{r tibble conversion}
+gradebook <- as_tibble(gradebook)
+```
+
 ## The `messy_impute()` function.
 ### Algorithm
-1. Firstly we have some error handling steps
+I will speak about the algorithm from the `center = "mean"` initially since the `center = "median"` is essentially the exact same, just use the `median()` function instead. Throughout all these calculations for means we are ignoring `NA` values by using the `na.rm = TRUE` argument.
 
-input tibble
+The key part of this function's algorithm is the following line:
+```{r key line, eval=FALSE}
+na_matrix <- which(is.na(input_tibble), arr.ind = TRUE)
+```
+
+This line allows stores the indices of the `NA` values in a matrix with the row and column index of the `NA` value.
+
+#### Row-By-Row
+Here is the algorithm for the row-by-row/student `NA` impute;
+
+1. If `margin = 1` then do the row-by-row replacement of `NA` values which is the following;
+2. For each row in the `na_matrix` first check if the row is a Homework assignment or Quiz Assignment just by seeing if the column of the `NA` value we are checking is between columns 2-6  or 7-13.
+3. To make the code more readable, store the row as a tibble into the `placeholder_row` variable.
+4. Remove the names on the row so we can actually perform the mean function using the `unlist(..., use.names=FALSE)`
+5. If we are replacing a Homework then use only the homework row by slicing indices 2-6 of the row. If we are replacing a Quiz then use the quiz row by slicing indices 7-13 of the row.
+5. Calculate the mean of the row and input it into the cell that we were looking at with the `NA` value.
+6. Repeat this for each `NA` value.
+7. Return the tibble.
+
+#### Column
+Next, here is the algorithm for the column/assignment `NA` impute:
+
+side-note: this one was much simpler as column operations are very easy to do with tibbles whereas rows are a bit tougher to work with.
+
+1. If `margin = 2` then do the column replacement of `NA` values which is the following;
+2. For each column in the `na_matrix` take the mean of the entire column and input it into the missing value cell.
+3. Repeat for each `NA` value.
+4. Return the tibble
+
+#### Test Case
+Here I showcase the student with UID 123456797 and the imputation of their `NA` scores.
+```{r test-case}
+gradebook[8,]
+messy_impute(gradebook, "mean", 1)[8, ]
+messy_impute(gradebook, "median", 2)[8, ]
+messy_impute(gradebook, "mean", 1, trim = 0.25)[8, ]
+```
+
+## Conversion into tidy data.
+To convert the `gradebook` dataset into tidy data we use the `pivot_longer()` function
+
+```{r tidy time}
+gradebook <- gradebook %>% pivot_longer(cols = !UID,
+                           names_to = "assignments",
+                           values_to = "marks")
+```
+
+
+
+<!-- input tibble
 which(is.na(tibble), arr.ind = TRUE)
 returns a matrix of two columns 
 first column will give row numbers and second column will give column numbers
@@ -69,6 +122,5 @@ The tidy object that you get out should have three columns
 UID, Assignments, Marks.
 
 
-
-
 check out harvard dataverse for q2
+-->
