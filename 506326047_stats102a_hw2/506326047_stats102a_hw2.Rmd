@@ -5,8 +5,27 @@ date: "2024-01-30"
 output: html_document
 ---
 
-```{r, include=FALSE}
+
+```{r libraries, include=FALSE}
+library(tidyverse)
 source("506326047_stats102a_hw2.R", local = knitr::knit_global())
+```
+
+```{r simulated data}
+set.seed(506326047) ## set the seed to UID
+
+## Create a character vector containing the names of homeworks and quizzes
+names <- paste0("Homework_", 1:5)
+names <- append(names, paste0("Quiz_", 1:7))
+
+## Create the gradebook_matrix with 1200 observations and reshape it to a matrix.
+gradebook_matrix <- matrix(runif(n=1200, min = 0, max = 100), ncol=length(names), byrow=TRUE)
+
+## Rename the columns
+colnames(gradebook_matrix) <- names
+
+## Create the gradebook dataframe with the UID column and the gradebook_matrix.
+gradebook <- data.frame(UID=123456789+(1:100), gradebook_matrix)
 ```
 
 ```{r generating missing values homework_4}
@@ -23,3 +42,37 @@ for (i in sample(100, 12)){
 }
 sum(is.na(gradebook$Quiz_4))
 ```
+
+```{r function_trial}
+trial_tibble <- as_tibble(gradebook)
+impute_tibble <- messy_impute(trial_tibble,"mean", margin = 1, trim = 0.25)
+impute_median <- messy_impute(trial_tibble,"median", margin = 1)
+```
+
+
+
+input tibble
+which(is.na(tibble), arr.ind = TRUE)
+returns a matrix of two columns 
+first column will give row numbers and second column will give column numbers
+what are the row and column indices of each of those trues.
+go row by row and find the positions of each of those in the data frame.
+
+
+sends column names to a new variable and stores the price into a different column
+grocery_tbl %>% pivot_longer(cols = !fruit(all columns except for fruit),
+                             names_to = "supermarket",
+                             values_to = "price")
+                             
+                             
+The tidy object that you get out should have three columns
+UID, Assignments, Marks.
+
+          
+str_detect("abc", "a")
+
+if the pattern is found in that string it is TRUE else FALSE
+
+
+
+check out harvard dataverse for q2
