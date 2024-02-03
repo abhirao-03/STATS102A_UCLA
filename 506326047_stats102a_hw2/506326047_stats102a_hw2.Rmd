@@ -85,7 +85,7 @@ side-note: this one was much simpler as column operations are very easy to do wi
 4. Return the tibble
 
 #### Test Case
-Here I showcase the student with UID 123456797 and the imputation of their `NA` scores.
+Here I showcase the student with UID 123456797 and the imputation of their `NA` scores for the Homework 4 assignments.
 ```{r test-case}
 gradebook[8,]
 messy_impute(gradebook, "mean", 1)[8, ]
@@ -94,12 +94,16 @@ messy_impute(gradebook, "mean", 1, trim = 0.25)[8, ]
 ```
 
 ## Conversion into tidy data.
-To convert the `gradebook` dataset into tidy data we use the `pivot_longer()` function
+To convert the `gradebook` data set into tidy data we use the `pivot_longer()` function. Additionally make sure we didn't lose any `NA` values through our test cases before hand.
 
 ```{r tidy time}
-gradebook <- gradebook %>% pivot_longer(cols = !UID,
-                           names_to = "assignments",
-                           values_to = "marks")
+gradebook_tidy <- gradebook %>% pivot_longer(cols = !UID,
+                           names_to = "Assignments",
+                           values_to = "Marks")
+```
+
+```{r trying out tidy_impute}
+tidy_impute(gradebook_tidy, center = "mean", margin = 1)
 ```
 
 
