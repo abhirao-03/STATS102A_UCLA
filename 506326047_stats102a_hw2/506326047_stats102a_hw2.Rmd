@@ -30,6 +30,7 @@ colnames(gradebook_matrix) <- names
 gradebook <- data.frame(UID = 123456789 + (1:100), gradebook_matrix)
 ```
 
+
 ## Creating Missing Values.
 To generate the missing values we use the `sample()` function to give us 12 indices of rows between 0 and 100 and then change those values to `NA`.
 ```{r generating missing values homework_4}
@@ -86,6 +87,7 @@ side-note: this one was much simpler as column operations are very easy to do wi
 
 #### Test Case
 Here I showcase the student with UID 123456797 and the imputation of their `NA` scores for the Homework 4 assignments.
+
 ```{r test-case}
 gradebook[8,]
 messy_impute(gradebook, "mean", 1)[8, ]
@@ -100,6 +102,7 @@ To convert the `gradebook` data set into tidy data we use the `pivot_longer()` f
 gradebook_tidy <- gradebook %>% pivot_longer(cols = !UID,
                            names_to = "Assignments",
                            values_to = "Marks")
+gradebook_tidy
 ```
 
 ```{r trying out tidy_impute}

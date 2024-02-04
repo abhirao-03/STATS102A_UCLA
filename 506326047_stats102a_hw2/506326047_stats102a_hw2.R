@@ -20,6 +20,7 @@ messy_impute <- function(input_tibble, center = "mean", margin, ...) {
   # Inputs mean/median value through students/rows
   if (center == "mean") {
     if (margin == 1) {
+      
       for (i in 1:length(na_matrix[, 1])) {
         if (na_matrix[i, 2] %in% c(2, 3, 4, 5, 6)) {
           placeholder_row <- input_tibble[na_matrix[i, 1], ]
@@ -27,12 +28,16 @@ messy_impute <- function(input_tibble, center = "mean", margin, ...) {
 
           input_tibble[na_matrix[i, 1], na_matrix[i, 2]] <- mean(placeholder_row[2:6], na.rm = TRUE, ...)
         } else {
+          placeholder_row <- input_tibble[na_matrix[i, 1], ]
+          placeholder_row <- unlist(placeholder_row, use.names = FALSE)
+          
           input_tibble[na_matrix[i, 1], na_matrix[i, 2]] <- mean(placeholder_row[7:13], na.rm = TRUE, ...)
         }
       }
+      
     } else { # Inputs mean/median values through columns/assignment
       for (i in 1:length(na_matrix[, 2])) {
-        input_tibble[na_matrix[i, 1], na_matrix[i, 2]] <- mean(input_tibble[[na_matrix[i, 2]]], na.rm = TRUE)
+        input_tibble[na_matrix[i, 1], na_matrix[i, 2]] <- mean(input_tibble[[na_matrix[i, 2]]], na.rm = TRUE, ...)
       }
     }
   } else {
@@ -44,6 +49,9 @@ messy_impute <- function(input_tibble, center = "mean", margin, ...) {
 
           input_tibble[na_matrix[i, 1], na_matrix[i, 2]] <- median(placeholder_row[2:6], na.rm = TRUE)
         } else {
+          placeholder_row <- input_tibble[na_matrix[i, 1], ]
+          placeholder_row <- unlist(placeholder_row, use.names = FALSE)
+          
           input_tibble[na_matrix[i, 1], na_matrix[i, 2]] <- median(placeholder_row[7:13], na.rm = TRUE)
         }
       }
@@ -69,9 +77,6 @@ tidy_impute <- function(input_tibble, center = "mean", margin, ...) {
     stop("the input_tibble is likely of the wrong size, keep tibble in the format: UID, Assignments, Marks")
   }
   
-  if (!all(c("UID", "Assignments", "Marks") == colnames(input_tibble))){
-    stop("the input_tibble does not have the proper column formats. Must be: 'UID', 'Assignments', 'Marks'")
-  }
   # error handling for center values not equal to expected inputs.
   if (center != "mean" & center != "median") {
     stop("center must be 'mean' or 'median'!")
@@ -82,6 +87,9 @@ tidy_impute <- function(input_tibble, center = "mean", margin, ...) {
     stop("margin must be either 1 or 2!")
   }
 
+  original_colnames <- colnames(input_tibble)
+  colnames(input_tibble) <- c('UID', 'Assignments', 'Marks')
+  
   tidy_na <- which(is.na(input_tibble), arr.ind = TRUE)
 
   if (center == "mean") {
@@ -107,9 +115,10 @@ tidy_impute <- function(input_tibble, center = "mean", margin, ...) {
       for (i in 1:length(tidy_na[, 1])) {
         na_ind <- tidy_na[, 1][i]
         na_assignment_id <- unlist(input_tibble[na_ind, ][2], use.names = FALSE)
+        
         na_assignment <- filter(input_tibble, input_tibble$Assignments == na_assignment_id)
-        na_assignment
-        input_tibble[na_ind, 3] <- mean(na_assignment$Marks, na.rm = TRUE)
+        
+        input_tibble[na_ind, 3] <- mean(na_assignment$Marks, na.rm = TRUE, ...)
       }
     }
   } else {
@@ -141,5 +150,6 @@ tidy_impute <- function(input_tibble, center = "mean", margin, ...) {
       }
     }
   }
+  colnames(input_tibble) <- original_colnames
   return (input_tibble)
 }
