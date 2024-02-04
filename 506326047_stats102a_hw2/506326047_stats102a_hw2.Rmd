@@ -1,7 +1,7 @@
 ---
 title: "506326047_stats102a_HW2"
 author: "Abhijeet Rao"
-date: "2024-01-30"
+date: "2024-02-04"
 output: html_document
 ---
 
@@ -89,7 +89,7 @@ side-note: this one was much simpler as column operations are very easy to do wi
 Here I showcase the student with UID 123456797 and the imputation of their `NA` scores for the Homework 4 assignments.
 
 ```{r test-case}
-gradebook[8,]
+gradebook[8, ]
 messy_impute(gradebook, "mean", 1)[8, ]
 messy_impute(gradebook, "median", 2)[8, ]
 messy_impute(gradebook, "mean", 1, trim = 0.25)[8, ]
@@ -99,35 +99,143 @@ messy_impute(gradebook, "mean", 1, trim = 0.25)[8, ]
 To convert the `gradebook` data set into tidy data we use the `pivot_longer()` function. Additionally make sure we didn't lose any `NA` values through our test cases before hand.
 
 ```{r tidy time}
-gradebook_tidy <- gradebook %>% pivot_longer(cols = !UID,
-                           names_to = "Assignments",
-                           values_to = "Marks")
+gradebook_tidy <- gradebook %>% pivot_longer(
+  cols = !UID,
+  names_to = "Assignments",
+  values_to = "Marks"
+)
 gradebook_tidy
 ```
 
-```{r trying out tidy_impute}
-tidy_impute(gradebook_tidy, center = "mean", margin = 1)
+
+## The `tidy_impute()` function.
+
+### Algorithm
+The error handling is the same as `messy_impute()`. For the algorithm below I will again follow the `center = 'mean'` function with both `margin = 1` and `margin = 2`.
+
+The first step in both algorithms is the finding where the `NAs` are and this is done using the following line: `tidy_na <- which(is.na(input_tibble), arr.ind=TRUE)`
+
+Additionally, since we might encounter input tibbles with differing column names I included the following line which changes the column names and changes them back later:
+
+```{r column name change, eval = FALSE}
+original_colnames <- colnames(input_tibble)
+colnames(input_tibble) <- c("UID", "Assignments", "Marks")
+...
+colnames(input_tibble) <- original_colnames
+return(input_tibble)
 ```
 
+#### Row-by-row algorithm (`margin = 1`)
+1. Take the `NA` value indices from the `tidy_na` database.
+2. Find the `NA` in the input tibble and take the `UID` of the student.
+3. Find all the assignments of the student.
+4. If the index of the `NA` is in the first 5 then it is a homework assignment and we must only mean the homeworks.
+5. Otherwise it is a quiz and we mean the quizzes.
+6. Replace the `NA` value with the mean calculated using the `mean()` function.
+
+#### Column algorithm (`margin = 2`)
+1. Take the `NA` value indices from the `tidy_na` database.
+2. Take the assignment type of that `NA` value.
+3. Use the `filter()` function to find all the values of that assignment type.
+4. Use the `mean()` function to get the mean.
+5. Replace the `NA` value with the mean.
+
+# Question 2
+### Ideas
+The first thing that came to mind was about categorical data that splits values and names. Similar to the data-set we just made tidy.
+
+1. Consumption of a good by some demographic.
+    a. Context -- Say you want to measure the consumption of goods by specific demographics.
+    b. Variables -- The demographic itself is one variable, then we would have a column for each good we are tracking.
+    c. Observation -- The observations would be the amount of each good consumed.
+2. Time-based tracking of the distance of an object.
+    a. Context -- Suppose you are tracking an objects distance from you throughout the days of the year.
+    b. Variables -- The object id itself, Each day of the year would be its own column
+    c. Observation -- Each observation would be the distance from you to the object you are tracking.
+3. Seafood Haul
+    a. Context -- Suppose you are a fishing company tracking the hauls from your fishing boats.
+    b. Variables -- Your boats you want to track. Each type of fish would be its own column.
+    c. Observations -- The amount of the type of fish caught in each 
+  
+## Actual Data Sets
+I was able to find three different data sets that seem to have non-tidy data.
+
+### 1. Global Alcohol Consumption.
+I was able to find this data set through the "rfordatascience" github, specifically the "TidyTuesday" repo that contains thousands of datasets. You can find the link [here](https://github.com/rfordatascience/tidytuesday).
+
+**Citation**:
+
+Mona Chalabi, *Global Alcohol Consumption*, 13th August 2014. FiveThirtyEight [publisher], [github.com/rfordatascience/tidytuesday/tree/master/data/2018](https://github.com/rfordatascience/tidytuesday/tree/master/data/2018). 4th February 2024
+
+#### Reading and Tidying the Dataset.
+```{r load data, message=FALSE}
+alcohol <- read_csv("datasets/alcohol_global.csv")
+alcohol
+```
+We can make this data tidy by shifting the type of serving, i.e. `beer_serving`, `spirit_servings`, `wine_servings`, into their own column called `servings` using a `pivot_longer()` function. Additionally, we can also drop the "_servings" suffix from each of these names.
+
+```{r tidy}
+alcohol_tidy <- alcohol %>% pivot_longer(
+  cols = c("beer_servings", "spirit_servings", "wine_servings"),
+  names_to = "serving_type",
+  values_to = "amount of servings"
+)
+alcohol_tidy$serving_type <- substr(alcohol_tidy$serving_type, 1, nchar(alcohol_tidy$serving_type) - 9)
+alcohol_tidy
+```
+
+### 2. Total Wealth in Great Britain.
+I found this next dataset through the Office for National Statistics(ONS) a department of the government of the United Kingdom. They released this dataset looking at the total wealth of individuals. This method is essentially similar to Idea #2. Instead of tracking the distance of an object, we are tracking the wealth of people through time.
+
+**Citation**:
+
+Office for National Statistics United Kingdom, *Total Wealth in Great Britain*, 7th January 2022, [www.ons.gov.uk/peoplepopulationandcommunity/personalandhouseholdfinances/incomeandwealth/datasets/totalwealthwealthingreatbritain](https://www.ons.gov.uk/peoplepopulationandcommunity/personalandhouseholdfinances/incomeandwealth/datasets/totalwealthwealthingreatbritain), 4th February 2024.
+
+ Here is an image of what the data looked like before converting it into a CSV :
+
+![Snapshot of Wealth in Great Britain Dataset.](datasets/UK_wealth/wealth_snapshot.png)
+
+#### Reading and Tidying the Dataset.
+We run the code just as before and get:
+
+```{r reading in csvs, message=FALSE}
+total_aggregate <- read_csv("datasets/UK_wealth/csv_files/total_aggregate_clean.csv")
+
+total_aggregate
+```
+
+Once again we can simply tidy the data using the `pivot_longer()` functions by sending the names of columns to `Time Range` and the values to `GBP_Millions`.
+```{r tidying}
+total_aggregate_tidy <- total_aggregate %>% pivot_longer(
+  cols = !`Wealth Decile`,
+  names_to = "Time Range",
+  values_to = "GBP Millions"
+)
+total_aggregate_tidy
+```
+
+### 3. United States Average Tuition Cost.
+This is another data set from the TidyTuesday collection. This dataset looks at the Average Tuition in every State from 2004 to 2016.
 
 
-<!-- input tibble
-which(is.na(tibble), arr.ind = TRUE)
-returns a matrix of two columns 
-first column will give row numbers and second column will give column numbers
-what are the row and column indices of each of those trues.
-go row by row and find the positions of each of those in the data frame.
+**Citation**:
 
+Online MBA Page, *Average Tuition in the United States*, 3rd April 2018, [onlinembapage.com/average-tuition-and-educational-attainment-in-the-united-states/](https://onlinembapage.com/average-tuition-and-educational-attainment-in-the-united-states/), Online MBA Page[publisher], Tom Mock[consolidater]. 4th February 2024.
 
-sends column names to a new variable and stores the price into a different column
-grocery_tbl %>% pivot_longer(cols = !fruit(all columns except for fruit),
-                             names_to = "supermarket",
-                             values_to = "price")
-                             
-                             
-The tidy object that you get out should have three columns
-UID, Assignments, Marks.
+#### Reading and Tidying the Dataset.
+```{r reading in the data, message = FALSE}
+us_average_tuition <- read_csv("datasets/us_avg_tuition.csv")
 
-
-check out harvard dataverse for q2
--->
+us_average_tuition
+```
+Once again to convert this data set into a tidy dataset we use the `pivot_longer()` function below:
+```{r tidying up}
+us_average_tuition_tidy <- us_average_tuition %>% pivot_longer(
+  cols = !State,
+  names_to = "Year",
+  values_to = "Cost"
+)
+us_average_tuition_tidy
+```
+### Final Thoughts.
+It seems that the most common type of messy data, is data that is tracked throughout time periods. Both the 2nd and 3rd datasets are examples of this type of messy data. While it may seem intuitive, this style does not conform to the tidy convention. However, this type of messy data seems relatively easy to convert into tidy data via the `pivot_longer()` function.
