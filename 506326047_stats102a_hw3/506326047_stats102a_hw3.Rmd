@@ -1,0 +1,202 @@
+---
+title: "506326047_stats102a_HW3"
+author: "Abhijeet Rao"
+date: "2024-02-18"
+output: html_document
+---
+
+```{r, include=FALSE}
+source("506326047_stats102a_hw3.R", local = knitr::knit_global())
+library(tidyverse)
+```
+# Question 1
+Firstly we load in the data using the `read_csv()` function in the `dplyr` package.
+```{r loading datas, message=FALSE}
+food_items = read_csv('data/food_item.csv')
+ingredient = read_csv('data/ingredient.csv')
+recipe = read_csv('data/recipe.csv')
+stock = read_csv('data/stock.csv')
+```
+### Part A
+To find the beef burger items, we first take the ingredients list and filter through to only find the ingredients used in the "Beef Burger" recipe. Then we inner join it with the `food_items` data base since we don't care about missing or NA values and only want to match the "Beef Burger" recipe. Finally this gives us the output of all the food items required for the "Beef Burger" recipe.
+```{r finding beef burger items}
+ingredient %>%
+    filter(recipe == 'Beef Burger') %>%
+      inner_join(food_items, by = c("food_item" = "item"))
+```
+### Part B
+Firstly we start off by inner joining our recipes database with the ingredients databse. Then we filter through and find all the recipes that either contain "Bread" or some tomato product. For this we use the `str_detect()` function that detects the presence of a 'Tomato' in the name of the food item.
+```{r finding ingredients for recipes}
+filtered_recipes <- recipe %>%
+                      inner_join(ingredient, by = c("name" = "recipe")) %>%
+                        filter(food_item == 'Bread' | str_detect(food_item, 'Tomato'))
+filtered_recipes
+```
+
+Then we create two new columns by adding up the weights of 'Bread' and tomato products we found. Here we separate the two weights.
+```{r finding weights}
+bread_tomato_weights <- filtered_recipes %>%
+        group_by(name) %>%
+        summarise(bread_weight = sum(`weight (oz)`[food_item == "Bread"]),
+                  tomato_weight = sum(`weight (oz)`[str_detect(food_item, 'Tomato')]))
+bread_tomato_weights
+```
+
+Notice above that we have 'Spaghetti and Meatballs' in this table but it only uses tomato product and no bread product. Thus we filter the database once again by only considering those items that contain both bread AND tomato products.
+```{r bread and tomato filtering}
+bread_tomato_recipes <- bread_tomato_weights %>%
+                filter(bread_weight != 0 & tomato_weight != 0)
+
+bread_tomato_recipes
+```
+
+### Part C
+Here we first join our `food_items` database with the `stock` database and then we filter by the type of food item being `meat` then we also filter by asking the shop to be in either 'W-Mart' or "Coco Mart". Since "Coco Mart" doesn't sell any meat products the only shop we see is "W-Mart" and the items are "Meatballs" and "Ground Beef"
+```{r joining databases}
+food_items %>%
+  inner_join(stock, by = c('item' = 'food_item')) %>%
+    filter(type == 'Meat', shop %in% c("W-Mart", "Coco Mart")) %>%
+        select(item, shop, `price (US dollars per lb)`)
+```
+
+### Part D
+First we filter the recipes in the ingredients database by the Beef and Turkey burgers. Then we join them with the food items to get their calorie information. We then group by the recipe and we summarise by summing up the total calorie for each ingredient in the recipes.
+
+```{r find calories}
+ingredient %>%
+  filter(recipe %in% c("Beef Burger", "Turkey Burger")) %>%
+  inner_join(food_items, by = c("food_item" = 'item')) %>%
+  group_by(recipe) %>%
+  summarise(total_cal = sum(`calories`*`weight (oz)`))
+```
+
+### Part E
+Firstly we need to figure out which recipes contain wheat products. So we join the ingredients database with the food items database and filter by the type of food item. Then we those recipe names are stored as `wheat_recipes` as they contain wheat products.
+```{r wheat recipes}
+wheat_recipes <- ingredient %>%
+  inner_join(food_items, by = c('food_item' = 'item')) %>%
+  filter(type == "Wheat product") %>%
+  select(recipe)
+```
+
+Next we join our `wheat_recipes` database once again with the ingredients database and the food items database to get the remaining ingredients. Finally we do the same operation we did to find the calories of the two different burgers in part D.
+```{r calorie calculating}
+wheat_recipes %>%
+  inner_join(ingredient, by = 'recipe') %>%
+  inner_join(food_items, by = c('food_item' = 'item')) %>% 
+  mutate(tot_cal = `calories`*`weight (oz)`) %>%
+  group_by(recipe) %>%
+  summarise(total_calories = sum(tot_cal))
+```
+
+# Question 2
+
+```{r load names}
+names <- readLines(con='data/names.txt')
+names
+```
+### Part 1
+These ones are relatively simple, we simply just match digit characters and non digit characters and then we use our spacing special characters to judge if names are in the conventional format.
+
+#### Part A
+```{r pattern 1a}
+# pat_1_a = "\\d"
+str_view(names, pat_1_a)
+```
+#### Part B
+```{r pattern 1b}
+# pat_1_b = "^[a-zA-Z]{4}$"
+str_view(names, pat_1_b)
+```
+
+#### Part C
+```{r pattern 1c}
+# pat_1_c = "^[A-Z][a-z]+\\s[A-Z][a-z]*\\s*[A-Z]*[a-z]*$"
+str_view(names, pat_1_c)
+```
+
+```{r cards import}
+cards <- readLines(con = 'data/cards.txt')
+cards
+```
+### Part 2
+The commonality between both parts was the requirement to space every 4 characters and this is done using the `str_replace_all()` command with the pattern `'(\\d{4})\\s*'` that handles the grouping and spacing.
+ 
+#### Part A
+Since we have an exact requirement for 16 digits, we can let our space characters vary with the `*` operator while keeping our digit requirement strict. This gives us the following pattern.
+
+```{r pattern 2 a}
+# pat_2_a = "^[5][0-9]{3}\\s*[0-9]{4}\\s*[0-9]{4}\\s*[0-9]{4}$"
+master_cards <- str_extract(cards, pat_2_a)
+master_cards <- master_cards[!is.na(master_cards)]
+str_replace_all(master_cards, '(\\d{4})\\s*', '\\1 ')
+```
+
+#### Part B
+This one is still very similar to the previous one, just now we start with a `4` instead of a `5` and we also don't need to match exactly 4 digits on the last grouping of numbers, we can match 1,4 thus we index our operator slightly differently to give the intended result.
+```{r pattern 2 b}
+# pat_2_b = "^4[0-9]{3}\\s*[0-9]{4}\\s*[0-9]{4}\\s*[0-9]{1,4}$"
+visa_cards <- str_extract(cards, pat_2_b)
+visa_cards <- visa_cards[!is.na(visa_cards)]
+
+visa_cards <- str_replace_all(visa_cards, '(\\d{4})\\s*', '\\1 ')
+visa_cards
+```
+
+### Part 3
+Firstly, we load in our data.
+```{r read in data, warning=FALSE}
+passwords <- readLines(con = 'data/passwords.txt')
+```
+#### Part A
+We use the look-ahead feature of 'regex' to search for at least 1 numeric character as our first grouping, then at least 1 letter as our second grouping. The order of these groupings doesn't really matter as the placeholder operator allows us to look throughout the entire string. Then we limit the size of the string to 8+.
+```{r pattern 3 a}
+# pat_3_a = "^(?=.*[0-9])(?=.*[a-zA-Z]).{8,}$"
+
+valid_passwords <- str_extract(passwords, pat_3_a)
+valid_passwords <- valid_passwords[!is.na(valid_passwords)]
+valid_passwords
+```
+
+#### Part B
+This one is essentially the same as the previous part, except now we separate the group for at least 1 letter into one grouping specifically for lower case and 1 for upper case. Then we add another one for the punctuation.
+```{r patter 3 b}
+# pat_3_b = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[[:punct:]]).{8,}"
+str_view(passwords, pat_3_b)
+```
+
+### Part 4
+Firstly we load our data into our work-space.
+```{r load data}
+load("data/wordlists.RData")
+```
+
+#### Part A
+I recognized that that the whole of `x` only contains characters from a-f thus we simply create a regex expression to filter any strings that match a-f 0 or more times to get `pat_4_a = '^[a-f]*$'`
+```{r pattern 4 a}
+# pat_4_a = '^[a-f]*$'
+x <- wordlists[["Ranges"]][["x"]]
+y <- wordlists[["Ranges"]][["y"]]
+
+all(str_detect(x, pat_4_a) != str_detect(y, pat_4_a))
+```
+
+#### Part B
+I noticed that the first 3 letters repeat elsewhere in the word, also they range from a-u. So firstly, we group the first three together `([a-u]{3})` then we can have any random characters happen as long as we match that first group again and then some random stuff can come after that as well, thus `pat_4_b = "([a-u]{3}).*\\1.*"`
+```{r pattern 4 b}
+# pat_4_b = "([a-u]{3}).*\\1.*"
+x <- wordlists[["Backrefs"]][["x"]]
+y <- wordlists[["Backrefs"]][["y"]]
+
+all(str_detect(x, pat_4_b) != str_detect(y, pat_4_b))
+```
+
+#### Part C
+This one I didn't really have a great idea on how I could adapt the pattern from the discussion session during last week, so I just left it like it is, and as the test shows this fails.
+```{r primes}
+# pat_4_c = "^(?!(..)\\1+$).+"
+x <- wordlists[["Prime"]][["x"]]
+y <- wordlists[["Prime"]][["y"]]
+
+all(str_detect(x, pat_4_c) != str_detect(y, pat_4_c))
+```
