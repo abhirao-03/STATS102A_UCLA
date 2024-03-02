@@ -5,3 +5,65 @@ date: "2024-03-01"
 output: html_document
 ---
 
+```{r creating pqnumber object}
+pq_class <- function(sign, p, q, nums){
+  if (!(sign %in% c(1, -1))){
+    stop("sign must be either 1 or -1")
+  }
+  if(length(nums) != p + q + 1){
+    stop("incorrect size for p, q, and nums")
+  }
+  if (p < 0 | q < 0){
+    stop("p and q must be positive values.")
+  }
+  structure(list(sign, p, q, nums), class = 'pqnumber')
+}
+```
+
+```{r trying out constructor}
+my_pq <- pq_class(-1, 3, 4, 1:8)
+```
+
+```{r predicate function}
+is_pqnumber <- function(pq_number){
+  if(class(pq_number) == "pqnumber"){
+    return (TRUE)
+  } else {
+    return (FALSE)
+  }
+}
+
+c(is_pqnumber(2), is_pqnumber(my_pq))
+```
+
+```{r dec rep}
+p = 3
+q = 4
+nums = 1:8
+
+dec_rep = 0
+for (i in 1:length(nums)){
+  dec_rep = dec_rep + (nums[i] * 10^(i - p - 1))
+}
+format(dec_rep, nsmall = p)
+```
+
+
+
+```{r augmenting print with our class}
+print.pq_class <- function(sign, p, q, nums, dec = FALSE){
+  if (dec == TRUE){
+    dec_rep = 0
+    for (i in 1:length(nums)){
+      dec_rep = dec_rep + (nums[i] * 10^(i - p - 1))
+    }
+    return (dec_rep)
+  } else {
+    print(my_pq)
+  }
+}
+```
+
+```{r printing trial}
+print(my_pq, dec=TRUE)
+```
