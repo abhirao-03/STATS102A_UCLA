@@ -1,0 +1,7 @@
+---
+title: "506326047_stats102a_HW4"
+author: "Abhijeet Rao"
+date: "2024-03-01"
+output: html_document
+---
+
