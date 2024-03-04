@@ -60,9 +60,9 @@ is_pqnumber <- function(x) {
 
 
 
-print.pqnumber <- function(x, dec = FALSE){
+print.pqnumber <- function(x, DEC = FALSE){
   # if dec is true then run the algorithm to print out the value of pqnumber.
-  if (dec == TRUE){
+  if (DEC == TRUE){
     p = x$p
     nums = x$nums
     
@@ -74,7 +74,7 @@ print.pqnumber <- function(x, dec = FALSE){
       dec_rep = dec_rep + (nums[i] * 10^(i - p - 1)) 
     }
     # return dec_rep with the correct number of decimal points.
-    return (format(dec_rep, nsmall = x$p))
+    return (format((x$sign * dec_rep), nsmall = x$p))
   } else {
     # just a bunch of concatenations to print in the desired format.
     cat(cat(paste0("sign = ",x$sign),
@@ -84,4 +84,121 @@ print.pqnumber <- function(x, dec = FALSE){
         cat("nums =", x$nums),
         sep='\n')
   }
+}
+
+as_pqnumber <- function(x, p, q){
+  
+  UseMethod("as_pqnumber")
+}
+
+as_pqnumber.numeric <- function(x, p, q){
+  int_portion = floor(x)
+  dec_portion = round(x - floor(x), p)
+  
+  int_vec = rev(unlist(strsplit(as.character(int_portion), '')))
+  
+  dec_vec = rev(unlist(strsplit(as.character(dec_portion), '')))
+  dec_vec = dec_vec[1:p]
+  dec_vec = dec_vec[dec_vec != '.']
+  dec_vec
+  if (length(int_vec) < q + 1){
+    length(int_vec) <- q + 1
+    int_vec[is.na(int_vec)] <- 0
+  }
+  
+  if (length(dec_vec) < p){
+    dec_rev = rev(dec_vec)
+    length(dec_rev) <- p
+    dec_rev[is.na(dec_rev)] <- 0
+    dec_vec = rev(dec_rev)
+  }
+  
+  nums = c(dec_vec, int_vec)
+  num_rep = as.numeric(nums)
+  
+  if (x < 0){
+    sign = -1
+  } else {
+    sign = 1
+  }
+  
+  
+  return(pq_class(sign = sign, p = p, q = q, nums = num_rep))
+  
+}
+
+as_numeric <- function(x){
+  
+  UseMethod("as_numeric")
+}
+
+as_numeric.pqnumber <- function(x){
+  if (!inherits(x, 'pqnumber')){
+    stop('x must be a pqnumber')
+  }
+  return (c(x$sign, x$p, x$q, x$nums))
+}
+
+
+carry_over <- function(pq_1, pq_2){
+  p = max(c(pq_1$p, pq_2$p))
+  q = max(c(pq_1$q, pq_2$q))
+  
+  num1 <- pq_1$nums
+  q_p1 <- pq_1$q
+  p_p1 <- pq_1$p
+  
+  num2 <- pq_2$nums
+  q_p2 <- pq_2$q
+  p_p2 <- pq_2$p
+  
+  while (q_p1 < q){
+    num1 = c(num1, 0)
+    q_p1 = q_p1 + 1
+  }
+  
+  while (q_p2 < q){
+    num2 = c(num2, 0)
+    q_p2 = q_p2 + 1
+  }
+  
+  while (p_p2 < p){
+    num2 <- c(0, num2)
+    p_p2 <- p_p2 + 1
+  }
+  
+  while (p_p1 < p){
+    num1 <- c(0, num1)
+    p_p1 <- p_p1 + 1
+  }
+  
+  sum_vec <- num1 + num2
+  
+  for (i in 1:(length(sum_vec) - 1)){
+    while(sum_vec[i] > 9){
+      sum_vec[i] <- sum_vec[i] - 10
+      sum_vec[i + 1] = sum_vec[i + 1] + 1
+    }
+  }
+  
+  while(sum_vec[length(sum_vec)] > 9){
+    sum_vec[length(sum_vec)] <- sum_vec[length(sum_vec)] - 10
+    sum_vec = c(sum_vec, 1)
+  }
+  return(list(sum = sum_vec, p = p, q = q))
+}
+
+add <- function(x, y){
+  if (x$sign == y$sign){
+    results <- carry_over(x, y)
+    return(pq_class(sign = x$sign, results$p, results$q, results$sum))
+  } else {
+    subtract(x, y)
+  }
+}
+
+
+
+subtract <- function(pq_1, pq_2){
+  
 }

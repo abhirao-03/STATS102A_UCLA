@@ -5,90 +5,19 @@ date: "2024-03-01"
 output: html_document
 ---
 
-```{r creating pqnumber object}
-pq_class <- function(sign, p, q, nums){
-  if (!(sign %in% c(1, -1))){
-    stop("sign must be either 1 or -1")
-  }
-  if(length(nums) != p + q + 1){
-    stop("incorrect size for p, q, and nums")
-  }
-  if (p < 0 | q < 0){
-    stop("p and q must be positive values.")
-  }
-  if (any(nums < 0 | nums > 9 | nums %% 1 != 0)) {
-    stop("nums must contain integers between 0 and 9.")
-  }
-  structure(list(sign = sign, p = p, q = q, nums = nums), class = 'pqnumber')
-}
+```{r import R file}
+source("506326047_stats102a_hw4.R", local = knitr::knit_global())
 ```
 
-```{r trying out constructor}
-my_pq <- pq_class(1, 3, 4, 1:8)
+```{r instantiating pq_numbers}
+pq_one = pq_class(1, 3, 4, 1:8)
+pq_two = pq_class(1, 6, 0, nums = c(3, 9, 5, 1, 4, 1, 3))
+pq_tre = pq_class(-1, 5, 1, nums = c(2, 8, 2, 8, 1, 7, 2))
 ```
 
-```{r predicate function}
-is_pqnumber <- function(x) {
-  # Check if the object is of class "pqnumber"
-  if (!inherits(x, "pqnumber")) {
-    return(FALSE)
-  }
-  
-  # Check if the object has all required components
-  if (!(all(c("sign", "p", "q", "nums") %in% names(x)))) {
-    return(FALSE)
-  }
-  
-  # Check if sign is either +1 or -1
-  if (x$sign != 1 & x$sign != -1) {
-    return(FALSE)
-  }
-  
-  # Check if p and q are non-negative integers
-  if (!(is.numeric(x$p)) | !(is.numeric(x$q)) | x$p %% 1 != 0 | x$q %% 1 != 0 | x$p < 0 | x$q < 0) {
-    return(FALSE)
-  }
-  
-  # Check if nums is a numeric vector of length p + q + 1
-  if (!(is.numeric(x$nums)) | length(x$nums) != x$p + x$q + 1) {
-    return(FALSE)
-  }
-  
-  # Check if nums contains integers between 0 and 9
-  if (any(x$nums < 0 | x$nums > 9 | x$nums %% 1 != 0)) {
-    return(FALSE)
-  }
-  
-  # If all checks pass, return TRUE
-  return(TRUE)
-}
-
-c(is_pqnumber(2), is_pqnumber(my_pq))
+```{r printing}
+c(print(pq_one, DEC=TRUE), print(pq_two, DEC=TRUE), print(pq_tre, DEC=TRUE))
 ```
 
 
 
-```{r augmenting print with our class}
-print.pqnumber <- function(x, dec = FALSE){
-  if (dec == TRUE){
-    p = x$p
-    nums = x$nums
-    dec_rep = 0
-    for (i in 1:length(nums)){
-      dec_rep = dec_rep + (nums[i] * 10^(i - p - 1))
-    }
-    return (format(dec_rep, nsmall = x$p))
-  } else {
-    cat(cat(paste0("sign = ",x$sign),
-            paste0("p = ", x$p),
-            paste0("q = ", x$q),
-            sep = "\n"),
-        cat("nums =", x$nums),
-        sep='\n')
-  }
-}
-```
-
-```{r printing trial}
-print(my_pq)
-```
