@@ -5,19 +5,88 @@ date: "2024-03-01"
 output: html_document
 ---
 
-```{r import R file}
+```{r import R file, include=FALSE}
 source("506326047_stats102a_hw4.R", local = knitr::knit_global())
 ```
 
+## Algorithm for Required Functions.
+### Carry-Over Function.
+1. Take in two pq numbers
+2. Set `p` and `q` to be the max `p` and `q` of the two `pqnumber`s
+3. Store the `nums`, `p`, `q` of both `pqnumber`s
+4. Pad the `pqnumber`s appropriately.
+    a. check if the `p`(`q`) of a `pqnumber` is less than the max `p`(`q`)
+    b. if it is less, then add a 0 at the end(beginning) and continue until they are equal.
+5. Now that the two `nums` vectors have the proper dimensions, add them together.
+6. Loop through each element in the summed vector and if its more than 9, subtract 10 and add one to the next element in the list.
+7. Finally if the last element is greater than 9, then add a final 1 at the end of the vector.
+8. Return the `p` and `q` that were calculated along with the summed vector as a named list.
+
+### Addition Function.
+1. Take in two `pqnumber`s.
+2. If the signs are equal then it is an addition, otherwise its a subtraction.
+3. Store the sign of the `pqnumber`s and re-assign them to 1 so we can use the `carry_over` function.
+4. Use the results from the `carry_over` and the stored sign to create a new `pqnumber` object.
+
+### Borrowing Function.
+This function follows a similar principle as the `carry_over` function.
+
+NOTE:  In this function it is assumed that the first `pqnumber` is greater than the second `pqnumber`
+
+1. Assign `p` and `q` values as the max `p` and `q` of the two `pqnumber`s
+2. Pad them just as we did for the `carry_over` function.
+3. Subtract the two `nums`.
+4. If an element in the subtracted list is less than 0 then add 10 and subtract 1 from the next element. Do this up till the last element.
+5. Return the `p`, `q` and the subtractedv ector as a named list.
+
+### Subtraction Function.
+1. In subtraction, if the signs of two numbers are different, then it is an addition.
+    a. Store the sign of the first `pqnumber` and re-assign both `pqnumber`s to have `sign = 1`
+2. If the two signs are equal then pass to the next stage.
+3. Test which number is bigger, then pass that number into the `borrow` function.
+4. Use the returned values from the `borrow` function to create a `pqnumber` using the appropriate sign.
+
+### Multiplication Function.
+
+I wasn't able to figure out how to do this function without using the coercion functions. I think this may be the appropriate steps:
+
+1. Seperate the two `pqnumber`s by their base 10s.
+2. Using a for loop multiply over each base 10 throughout the vector.
+3. Add each of them together.
+4. Use strsplit and string to find the period and create our p,q based off this location.
+5. create a new `pqnumber` based off these values.
+
+## Test Cases.
+
 ```{r instantiating pq_numbers}
-pq_one = pq_class(1, 3, 4, 1:8)
-pq_two = pq_class(1, 6, 0, nums = c(3, 9, 5, 1, 4, 1, 3))
-pq_tre = pq_class(-1, 5, 1, nums = c(2, 8, 2, 8, 1, 7, 2))
+pq_1 = pqnumber(1, 3, 4, 1:8)
+pq_2 = pqnumber(1, 6, 0, nums = c(3, 9, 5, 1, 4, 1, 3))
+pq_3 = pqnumber(-1, 5, 1, nums = c(2, 8, 2, 8, 1, 7, 2))
 ```
 
-```{r printing}
-c(print(pq_one, DEC=TRUE), print(pq_two, DEC=TRUE), print(pq_tre, DEC=TRUE))
+### Add Function.
+```{r printing pqnumbers}
+c(print(pq_1, DEC=TRUE), print(pq_2, DEC=TRUE), print(pq_3, DEC=TRUE))
 ```
 
+```{r testing add}
+# adding pq_1 and pq_2
+c(print(pq_1, DEC=TRUE) + print(pq_2, DEC=TRUE), print(add(pq_1, pq_2), DEC=TRUE))
+# adding pq_1 and pq_3
+c(print(pq_1, DEC=TRUE) + print(pq_3, DEC=TRUE), print(add(pq_1, pq_3), DEC=TRUE))
+# adding pq_2 and pq_3
+c(print(pq_2, DEC=TRUE) + print(pq_3, DEC=TRUE), print(add(pq_2, pq_3), DEC=TRUE))
+```
+### Subtraction Function.
+```{r printing pqnumbers again}
+c(print(pq_1, DEC=TRUE), print(pq_2, DEC=TRUE), print(pq_3, DEC=TRUE))
+```
 
-
+```{r testing subtract}
+# subtracting pq_1 and pq_2
+c(print(pq_1, DEC=TRUE) - print(pq_2, DEC=TRUE), print(subtract(pq_1, pq_2), DEC=TRUE))
+# subtracting pq_1 and pq_3
+c(print(pq_1, DEC=TRUE) - print(pq_3, DEC=TRUE), print(subtract(pq_1, pq_3), DEC=TRUE))
+# subtracting pq_2 and pq_3
+c(print(pq_2, DEC=TRUE) - print(pq_3, DEC=TRUE), print(subtract(pq_2, pq_3), DEC=TRUE))
+```
