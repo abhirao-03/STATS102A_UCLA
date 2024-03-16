@@ -1,0 +1,83 @@
+---
+title: "506326047_stats102a_HW5"
+author: "Abhijeet Rao"
+date: "2024-03-15"
+output: html_document
+---
+
+```{r import R file, include=FALSE}
+source("506326047_stats102a_hw5.R", local = knitr::knit_global())
+```
+
+# Question 1
+## Part 1
+### Intervals
+To find the intervals I essentially just graphed the functions and chose "nice" numbers where the roots were inside the interval of length 1. So the intervals in order are:
+
+1. [-4,-3]
+2. [3, 4]
+3. [1, 2]
+
+### Approximation of Number of Iterations:
+For function 1 I believe
+
+### Bisection Method for Each function
+Below we define the bisection algorithm, I've defined it as a function as this will allow us to just run one line of code instead of repeating the same thing 3 times.
+```{r defining bisection function}
+bisection <- function(func, interval, max_iter){
+  a = interval[1]
+  b = interval[2]
+  
+  if (func(a) == 0){
+    return (a)
+  }
+  if (func(b) == 0){
+    return (b)
+  }
+  
+  iter_count <- 0
+  mid <- (a+b)/2
+  
+  while (abs(a - b) > 10^(-8)){
+    mid = (a+b)/2
+    if (func(a) * func(mid) < 0){
+      b <- mid
+    } else {
+      a <- mid
+    }
+  }
+  return (mid)
+}
+```
+
+#### Function 1
+```{r trying bisection}
+func_1 <- function(x){
+  return (x^3 + 32)
+}
+
+interval_one = c(-4,-3)
+
+func_1(bisection(func_1, interval_one, 1000))
+```
+
+#### Function 2
+```{r trying bisection}
+func_2 <- function(x){
+  return (x^x - 151)
+}
+interval_one = c(3,4)
+
+func_2(bisection(func_2, interval_one, 1000))
+```
+
+#### Function 3
+
+```{r trying bisection}
+func_3 <- function(x){
+  return (exp(-x^2) - (1/10))
+}
+interval_one = c(1,2)
+
+func_3(bisection(func_3, interval_one, 1000))
+```
