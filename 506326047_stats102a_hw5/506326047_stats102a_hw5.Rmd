@@ -6,6 +6,8 @@ output: html_document
 ---
 
 ```{r import R file, include=FALSE}
+library(tidyverse)
+library(ggplot2)
 source("506326047_stats102a_hw5.R", local = knitr::knit_global())
 ```
 
@@ -19,7 +21,7 @@ To find the intervals I essentially just graphed the functions and chose "nice" 
 3. [1, 2]
 
 ### Approximation of Number of Iterations:
-For function 1 I believe
+The number of iterations for all functions will take atleast 27 iterations. Since the interval size for all the intervals is the same, it should be around the same for all functions.
 
 ### Bisection Method for Each function
 Below we define the bisection algorithm, I've defined it as a function as this will allow us to just run one line of code instead of repeating the same thing 3 times.
@@ -51,7 +53,7 @@ bisection <- function(func, interval, max_iter){
 ```
 
 #### Function 1
-```{r trying bisection}
+```{r func1 bisect}
 func_1 <- function(x){
   return (x^3 + 32)
 }
@@ -62,7 +64,7 @@ func_1(bisection(func_1, interval_one, 1000))
 ```
 
 #### Function 2
-```{r trying bisection}
+```{r func2 bisect}
 func_2 <- function(x){
   return (x^x - 151)
 }
@@ -72,8 +74,7 @@ func_2(bisection(func_2, interval_one, 1000))
 ```
 
 #### Function 3
-
-```{r trying bisection}
+```{r func3 bisect}
 func_3 <- function(x){
   return (exp(-x^2) - (1/10))
 }
@@ -81,3 +82,224 @@ interval_one = c(1,2)
 
 func_3(bisection(func_3, interval_one, 1000))
 ```
+
+## Part 2
+First we'll define a $g(x)$ to act as $x_{n+1}$ this can be done by setting $f(x) = 0$ as follows:
+
+$$
+\begin{align}
+x^x - 151 &= 0\\
+x^x&=151\\
+x &= 151^{\frac{1}{x}}\\\\
+x_{n+1} = 151^{\frac{1}{x_n}}
+\end{align}
+$$
+Then we just apply this as the updated formula in a regular iteration step like we've seen above.
+1. Store initial guess
+2. Evaluate next guess using $g(x)$
+3. Repeat until stop criteria takes over, either max iterations or tolerance reached.
+
+
+```{r fixed point}
+g <- function(x) {
+  return (151^(1/x))
+}
+
+x_old <- 3.6
+x_new <- g(x_old)
+its <- 0
+tol <- 1e-8
+max_iter <- 10000
+
+while(abs(x_new - x_old) > tol & its < max_iter){
+  x_old <- x_new
+  x_new <- g(x_old)
+  its <- its + 1
+}
+```
+
+I've tried the following three update formulas and none of them worked for me:
+1. $g(x) = x - f(x) = x - x^x - 151$
+2. $g(x) = x + f(x) = x + x^x - 151$
+2. $g(x) = 151^{\frac{1}{x}}$
+
+Having said this I decided to see if the derivative of the function is bounded on the interval
+so $g'(x) = x^x$ and on the interval [1, 2] $|g'(x)| \neq 1$ thus this does not converge.
+
+
+## Part 3
+The algorithm for both functions is the exact same, the `get_sqrt` function is a case of `get_abroot` when `root = 2`. The derivation for the next guess in the root comes from the following.
+
+We can set $f(x) = x^n - a$ for a given real number $a$. Finding the root of this function will give us the $n$-th root of $a$. Then we just apply Newton-Raphson formula:
+
+$$
+\begin{align}
+  x_{n+1} &= x_n - \frac{f(x_n)}{f^\prime(x_n)} \\\\
+  x_{n+1} &= x_n - \frac{x_n^n - a}{(n)x^{n-1}_n} \\\\
+  x_{n+1} &= \frac{(n-1)x_n + \frac{a}{x_n^{n-1}}}{n}
+\end{align}
+$$
+
+This is the next guess equation, with this in mind we do a common iteration until we reach a tolerance or a maximum iteration.
+
+1. Store the initial guess as $\frac{a}{n}$
+2. Start the iteration process from the first iteration all the way to the max iteration. If we don't return anything in this for loop then we have failed to meet the maximum iteration criteria and we output the latest calcualted guess.
+3. Store the next guess using the equation above.
+4. Keep repeating this process until we find a root within our tolerance.
+
+This algorithm is the same for both functions.
+
+#### Test Cases
+Set our tolerance and maximum iteration:
+```{r tol and max iter}
+tol = 1e-8
+iter_max = 1000
+```
+
+Trying out the `get_sqrt` function
+```{r sqrt examples}
+a <- 7
+get_sqrt(a, tol = tol, iter_max = iter_max)
+```
+
+Trying out the `get_abroot` function
+```{r abroot examples}
+a <- 13
+get_abroot(a, root = 7, tol = tol, iter_max = iter_max)
+```
+
+#### Part D
+We can get the errors by setting verbose to `TRUE` and reading off the values
+```{r error storing}
+a <- 13
+get_abroot(a, root = 7, tol = tol, iter_max = iter_max, verbose = TRUE)
+```
+
+Next we create a vector containing the first 4 iterations and subtract it from the exact value to get the error:
+```{r errors}
+first_four = c(1.637103, 1.4997, 1.448694, 1.44264)
+error_vector = abs(first_four - 13^(1/7))
+print(error_vector)
+```
+
+The error decreases by a magnitude of 2 around each time, which is what we expect given the second order convergence of Newton-Raphson.
+
+# Part 2
+## Part A
+We use power rule and assuming that we are performing natural log we have the following derivative
+
+$$
+\begin{align}
+f(x) &= x^n  - n\alpha \log(x)\\
+f^\prime (x) &= nx^{n-1} - \frac{n\alpha}{x}
+\end{align}
+$$
+
+We set the derivative equal to 0 and solve to get:
+$$
+\begin{align}
+nx^{n-1} - \frac{n\alpha}{x} &= 0\\\\
+nx^{n-1} &= \frac{n\alpha}{x}\\\\
+x^n &= \alpha \\\\
+x &= \alpha^{\frac{1}{n}}
+\end{align}
+$$
+## Part B
+Newton's formula with the derivative we calculated becomes the following:
+
+$$
+\begin{align}
+  x_{n+1} &= x_n - \frac{f^\prime(x_n)}{f^{\prime\prime}(x_n)}\\\\
+  x_{n+1} &= x_n - \frac{n(x_n)^{n-1} - \frac{n\alpha}{x_n}}{n(n-1)(x_n)^{n-2} + \frac{n\alpha}{x_n}}
+\end{align}
+$$
+## Part C
+First we define $f(x) = x^n - n\alpha \log(x)$
+
+```{r defining f(x)}
+f_expr <- expression(x^2 + exp(-x), ...)
+```
+
+Next we define our `get_min()` function:
+
+```{r get_min}
+get_min <- function(f, x0, ...){
+  max_iter <- 1000
+  tol <- 1e-8
+  
+  f_prime  <- D(f, name = 'x', ...)
+  f_double <- D(f_prime, name = 'x', ...)
+  
+  x <- x0
+  
+  for (i in 1:max_iter){
+    while (abs(eval(f_prime)) > tol){
+      f_p <- eval(f_prime)
+      f_d <- eval(f_double)
+      x <- x - (f_p / f_d)
+    }
+    return (x)
+  }
+  warning('Convergence not reached')
+  return(x)
+}
+```
+
+```{r trying get min}
+a <- 3
+n <- 2
+f <- expression((x^n) - (n*a*log(x)))
+
+get_min(f, 1)
+```
+## Part D
+First we gather the datapoints that our function spits out, this can be done in a cleaner way but for this purpose we will simply ask it to print out each $x$ that it calculates and store it manually.
+
+```{r verbose}
+get_min <- function(f, x0, ...){
+  max_iter <- 1000
+  tol <- 1e-8
+  
+  f_prime  <- D(f, name = 'x', ...)
+  f_double <- D(f_prime, name = 'x', ...)
+  
+  x <- x0
+  
+  for (i in 1:max_iter){
+    while (abs(eval(f_prime)) > tol){
+      f_p <- eval(f_prime)
+      f_d <- eval(f_double)
+      x <- x - (f_p / f_d)
+      cat(x, '\n')
+    }
+    return (x)
+  }
+  warning('Convergence not reached')
+  return(x)
+}
+
+a <- 3
+n <- 2
+f <- expression((x^n) - (n*a*log(x)))
+
+get_min(f, 1)
+```
+So this means we have a vector of guesses that we can 
+
+
+
+```{r}
+# First, create the data frame with x and y values
+x <- seq(1, 2, by = 0.01)
+y <- eval(f)  # Make sure 'f' is defined before this line
+x_guesses <- c(1, 1.5, 1.714286, 1.731959, 1.732051)
+data <- data.frame(x = x, y = y)
+
+# I got a lot of my information from the official site documentation https://ggplot2.tidyverse.org/reference/
+ggplot(data, aes(x = x, y = y)) +
+  geom_line() +
+  labs(x = "x", y = "f(x)", title = "Graph of Function") + 
+  geom_vline(xintercept = x_guesses, linetype = 'dashed', color = 'darkred') +
+  theme_linedraw()
+```
+
