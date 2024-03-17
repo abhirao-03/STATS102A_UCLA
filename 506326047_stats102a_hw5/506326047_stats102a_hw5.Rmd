@@ -8,6 +8,7 @@ output: html_document
 ```{r import R file, include=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(rlang)
 source("506326047_stats102a_hw5.R", local = knitr::knit_global())
 ```
 
@@ -95,6 +96,7 @@ x_{n+1} = 151^{\frac{1}{x_n}}
 \end{align}
 $$
 Then we just apply this as the updated formula in a regular iteration step like we've seen above.
+
 1. Store initial guess
 2. Evaluate next guess using $g(x)$
 3. Repeat until stop criteria takes over, either max iterations or tolerance reached.
@@ -119,12 +121,13 @@ while(abs(x_new - x_old) > tol & its < max_iter){
 ```
 
 I've tried the following three update formulas and none of them worked for me:
+
 1. $g(x) = x - f(x) = x - x^x - 151$
 2. $g(x) = x + f(x) = x + x^x - 151$
 2. $g(x) = 151^{\frac{1}{x}}$
 
 Having said this I decided to see if the derivative of the function is bounded on the interval
-so $g'(x) = x^x$ and on the interval [1, 2] $|g'(x)| \neq 1$ thus this does not converge.
+so $g'(x) = x^x$ and on the interval [1, 2] $|g'(x)| \neq 1$ thus this fixed point iteration method does not converge.
 
 
 ## Part 3
@@ -214,92 +217,62 @@ $$
 \end{align}
 $$
 ## Part C
-First we define $f(x) = x^n - n\alpha \log(x)$
+### `get_min()` Algorithm
+The algorithm for the `get_min()` function is as follows:
 
-```{r defining f(x)}
-f_expr <- expression(x^2 + exp(-x), ...)
-```
+1. Inside `get_min()` define `single_deriv()` and `double_deriv()` these helper functions will evaluate the single and double integrals.
+2. After creating these functions create a loop that iterates to the max number of iterations.
+3. Inside that loop establish a tolerance criteria that will break the while loop.
+4. Apply newton's method using:
+  a. $$x_{n+1} = x_{n} - \frac{f^\prime(x_n)}{f^{\prime\prime}(x_n)}$$
+5. Keep updating until we've reached convergence if we don't reach convergence issue a warning and just return the current iterated `x`.
 
-Next we define our `get_min()` function:
-
-```{r get_min}
-get_min <- function(f, x0, ...){
-  max_iter <- 1000
-  tol <- 1e-8
-  
-  f_prime  <- D(f, name = 'x', ...)
-  f_double <- D(f_prime, name = 'x', ...)
-  
-  x <- x0
-  
-  for (i in 1:max_iter){
-    while (abs(eval(f_prime)) > tol){
-      f_p <- eval(f_prime)
-      f_d <- eval(f_double)
-      x <- x - (f_p / f_d)
-    }
-    return (x)
-  }
-  warning('Convergence not reached')
-  return(x)
-}
-```
-
+#### Test Case
 ```{r trying get min}
+f <- expression((x^n) - (n*a*log(x)))
+get_min(f=f, x0=1, n=2, a=3)
+```
+
+## Part D
+First we gather the data-points that our function spits out, this can be done in a cleaner way but for this purpose we will simply ask it to print out each $x$ that it calculates and store it manually.
+
+```{r outputing intermediate results}
 a <- 3
 n <- 2
 f <- expression((x^n) - (n*a*log(x)))
 
-get_min(f, 1)
-```
-## Part D
-First we gather the datapoints that our function spits out, this can be done in a cleaner way but for this purpose we will simply ask it to print out each $x$ that it calculates and store it manually.
-
-```{r verbose}
-get_min <- function(f, x0, ...){
-  max_iter <- 1000
-  tol <- 1e-8
+max_iter <- 1000
+tol <- 1e-8
   
-  f_prime  <- D(f, name = 'x', ...)
-  f_double <- D(f_prime, name = 'x', ...)
+f_prime  <- D(f, name = 'x')
+f_double <- D(f_prime, name = 'x')
   
-  x <- x0
+x <- 1
   
-  for (i in 1:max_iter){
-    while (abs(eval(f_prime)) > tol){
-      f_p <- eval(f_prime)
-      f_d <- eval(f_double)
-      x <- x - (f_p / f_d)
-      cat(x, '\n')
-    }
-    return (x)
+for (i in 1:max_iter){
+  while (abs(eval(f_prime)) > tol){
+    f_p <- eval(f_prime)
+    f_d <- eval(f_double)
+    x <- x - (f_p / f_d)
+    cat(x, '\n')
   }
-  warning('Convergence not reached')
-  return(x)
 }
 
-a <- 3
-n <- 2
-f <- expression((x^n) - (n*a*log(x)))
-
-get_min(f, 1)
 ```
-So this means we have a vector of guesses that we can 
 
+We can take the output above and create a vector to make vertical lines using `ggplot2()`.
 
-
-```{r}
-# First, create the data frame with x and y values
+```{r plotting}
 x <- seq(1, 2, by = 0.01)
-y <- eval(f)  # Make sure 'f' is defined before this line
+y <- eval(f)  
+
 x_guesses <- c(1, 1.5, 1.714286, 1.731959, 1.732051)
 data <- data.frame(x = x, y = y)
 
-# I got a lot of my information from the official site documentation https://ggplot2.tidyverse.org/reference/
+# I used the official documentation for ggplot which can be found at https://ggplot2.tidyverse.org/reference/
 ggplot(data, aes(x = x, y = y)) +
   geom_line() +
   labs(x = "x", y = "f(x)", title = "Graph of Function") + 
   geom_vline(xintercept = x_guesses, linetype = 'dashed', color = 'darkred') +
   theme_linedraw()
 ```
-

@@ -84,25 +84,34 @@ get_min <- function(f, x0, ...){
   # x0:         initial guess.
   #Returns:
   # min:        the minimum of f
+  
+  single_deriv <- function(f, ...) {
+    list2env(list(...), env = current_env())
+    Df = D(f, name = 'x')
+    eval(Df)
+  }
+  
+  double_deriv <- function(f, ...) {
+    list2env(list(...), env = current_env())
+    Df = D(f, name = 'x')
+    DDf = D(Df, name = 'x')
+    eval(DDf)
+  }
+  
   max_iter <- 1000
   tol <- 1e-8
-  
-  f_prime  <- D(f, name = 'x', ...)
-  f_double <- D(f_prime, name = 'x', ...)
   
   x <- x0
   
   for (i in 1:max_iter){
-    while (abs(eval(f_prime)) > tol){
-      f_p <- eval(f_prime)
-      f_d <- eval(f_double)
-      x <- x - (f_p / f_d)
+    while (abs(single_deriv(f, ...)) > tol){
+      f_d <- single_deriv(f, ...)
+      f_dd <- double_deriv(f, ...)
+      x <- x - (f_d / f_dd)
     }
     return (x)
   }
-  warning('Convergence not reached')
-  return(x)
+  warning("method did not converge")
+  return (x)
+  
 }
-
-
-
